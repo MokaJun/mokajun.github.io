@@ -7,14 +7,9 @@ assignees: ''
 
 ---
 
----
-name: Comment
-about: Article comments - 文章评论
-title: 这里填写你评论的文章的名称 · 摩卡君的小站
-labels: comment
-assignees: ''
-
----
+|   name   |   about   |   title   |  labels    |   assignees   |
+| ---- | ---- | ---- | ---- | ---- |
+|   Comment   |   Article comments - 文章评论   |   这里填写你评论的文章的名称 · 摩卡君的小站   |  comment    |   ''   |
 
 文章链接：<https://mokajun.github.io/>
 
