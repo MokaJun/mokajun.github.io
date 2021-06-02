@@ -2025,7 +2025,7 @@ body::before {
   padding-inline-start: 0;
 }
 .search-popup {
-  background-color: rgba(241,254,251,0.9);
+  background-color: rgba(212,184,230,0.9);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   background-position: center;
@@ -2171,7 +2171,7 @@ body::before {
     color: var(--hty-text-color);
   }
   :root:not([data-user-color-scheme]) body::before {
-    background-image: url("/images/29.jpg");
+    background-image: url("/images/8.jpg");
   }
   :root:not([data-user-color-scheme]) .char {
     background-color: rgba(0,0,0,0.5);
@@ -2247,7 +2247,7 @@ body::before {
   color: var(--hty-text-color);
 }
 [data-user-color-scheme='dark'] body::before {
-  background-image: url("/images/29.jpg");
+  background-image: url("/images/8.jpg");
 }
 [data-user-color-scheme='dark'] .char {
   background-color: rgba(0,0,0,0.5);
