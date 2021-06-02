@@ -41,9 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/\$\{hits}/, data.nbHits)
             .replace(/\$\{time}/, data.processingTimeMS);
           return `${stats}
-            <span class="algolia-powered">
-              <img src="https://algolia.com/icons/icon-48x48.png" alt="Algolia">
-            </span>
             <hr>`;
         },
       },
