@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>今日感慨</title>
+      <link href="%E4%BB%8A%E6%97%A5%E6%84%9F%E6%85%A8/"/>
+      <url>%E4%BB%8A%E6%97%A5%E6%84%9F%E6%85%A8/</url>
+      
+        <content type="html"><![CDATA[<p>好久没有记录生活了，难得搭起了博客，就写一写叭。 虽然用了大佬云游君的Theme，但是自己补插件也是花了不少心思。想想已经两天没有学习mybatis了呢，汗颜。😓</p><p>收获还是挺多的呢，最重要的就是想起了学IT的初衷，毕竟宅宅的我从一开始还是透过电脑观察世界来着。所以我的世界总围着电脑转（害，游戏太香了），感觉二进制的世界和三次元在我心里是划等号的。嘛，回忆起了初衷，感觉斗志满满，想学习了奥。✊</p><p>而且在搭建博客的时候，学到了好多知识，比如</p><ul><li><p>合理的使用API（搜索引擎、W留言+V留言、全局音乐播放器</p></li><li><p>Git Issue &amp; Git Discussion</p></li><li><p>阅读各种doc</p></li><li><p>提高了对环境变量的理解和命令行熟练度</p></li><li><p>复习了一点CSS的知识</p></li><li><p>提高了一点点对Git的理解（虽然还是不及格😀</p><ul><li><p>Git各种分支平台，虽然工具都是GIt，但是数据不互通</p><ul><li>.git文件夹的config里记录着对应的Repository</li><li>.gitignore文件里记录着不需要push的文件目录</li></ul></li></ul></li><li><p>提高了亿点点对包管理工具的理解</p><ul><li>原来npm是Node.js自带的包管理工具</li><li>难怪在装Nodejs的时候配置了环境变量</li><li><code>$ npm --save</code>的命令其实是把安装过的包记录在了<code>package.json</code>文件里，像<code>.pom</code>文件一样</li></ul></li><li><p>还有对markdown使用越来越熟练了</p></li></ul><p>最终搭出了一个漂漂亮亮的树洞记录心情和知识，感觉成就感Max</p><p>今后也要不断进步</p><p align="right">Always feel happy and keep moving-----Moka☆君</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 随笔 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 日记 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>algolia</title>
       <link href="algolia/"/>
       <url>algolia/</url>
