@@ -1,0 +1,636 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#000000"><meta name="author" content="Moka☆君"><meta name="copyright" content="Moka☆君"><meta name="generator" content="Hexo 5.4.0"><meta name="theme" content="hexo-theme-yun"><title>Spring Boot整合Redis | My Site</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-markdown-css@0.1.24/dist/yun/yun-markdown.min.css"><script src="//at.alicdn.com/t/font_1140697_j5gk85dg4pf.js" async></script><script src="https://cdn.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>document.addEventListener("DOMContentLoaded", () => {
+  [".post-card",".post-content img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+});
+</script><link class="aplayer-style-marker" rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.css"><script class="aplayer-script-marker" src="https://cdn.jsdelivr.net/npm/aplayer@latest/dist/APlayer.min.js" defer></script><script class="meting-script-marker" src="https://cdn.jsdelivr.net/npm/meting@1/dist/Meting.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/pjax@latest/pjax.min.js" defer></script><script src="/js/pjax.js" defer></script><script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script><link id="light-prism-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@latest/themes/prism.css" media="(prefers-color-scheme: light)"><link id="dark-prism-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@latest/themes/prism-tomorrow.css" media="(prefers-color-scheme: dark)"><link rel="icon" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#000000"><link rel="alternate icon" href="/yun.ico"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="preload" href="/js/utils.js" as="script"><link rel="preload" href="/js/hexo-theme-yun.js" as="script"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><script id="yun-config">
+    const Yun = window.Yun || {};
+    window.CONFIG = {"hostname":"mokajun.github.io","root":"/","title":["Mo","ka","君","☆","的","小","站"],"version":"1.6.1","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"想要搜些什么？","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/avatar/none.jpg","say":{"api":"https://v1.hitokoto.cn","hitokoto":true},"algolia":{"appID":"GCEWMYKNDO","apiKey":"8beada2532ad3c9d63a10afb8e4342f2","indexName":"blog_index","hits":{"per_page":10}},"fireworks":{"colors":["102, 167, 221","62, 131, 225","33, 78, 194"]}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/utils.js"></script><script src="/js/hexo-theme-yun.js"></script><meta name="description" content="Redis基于内存进⾏存储，⽀持 key-value 的存储形式，底层是⽤ C 语⾔编写的。 基于 key-value 形式的数据字典，结构⾮常简单，没有数据表的概念，直接⽤键值对的形式完成数据的 管理，Redis ⽀持 5 种数据类型：    字符串    列表   集合    有序集合    哈希  安装RedisLinux系统去官网下，Windows系统去github微软大佬那里下转版 注意">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot整合Redis">
+<meta property="og:url" content="https://mokajun.github.io/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Redis/index.html">
+<meta property="og:site_name" content="My Site">
+<meta property="og:description" content="Redis基于内存进⾏存储，⽀持 key-value 的存储形式，底层是⽤ C 语⾔编写的。 基于 key-value 形式的数据字典，结构⾮常简单，没有数据表的概念，直接⽤键值对的形式完成数据的 管理，Redis ⽀持 5 种数据类型：    字符串    列表   集合    有序集合    哈希  安装RedisLinux系统去官网下，Windows系统去github微软大佬那里下转版 注意">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/06/08/OqIPJFhWATtD4Ng.png">
+<meta property="og:image" content="https://i.loli.net/2021/06/08/xUsVb6dIJT2ekXH.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/06/08/9HWR3kJU8qgK7wZ.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/06/08/UBAaqXYTfKHPMus.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/06/08/bPKqIt2kUz7waD5.png">
+<meta property="article:published_time" content="2021-06-08T09:51:40.956Z">
+<meta property="article:modified_time" content="2021-06-09T14:07:50.182Z">
+<meta property="article:author" content="Moka☆君">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/06/08/OqIPJFhWATtD4Ng.png"><script src="/js/ui/mode.js"></script></head><body><script defer src="https://cdn.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-list-ordered"></use></svg></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-passport-line"></use></svg></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="Moka☆君"><img width="96" loading="lazy" src="/images/avatar.jpg" alt="Moka☆君"><span class="site-author-status" title="冲冲冲！马哒马哒！">😝</span></a><div class="site-author-name"><a href="/about/">Moka☆君</a></div><a class="site-name" href="/about/site.html">My Site</a><sub class="site-subtitle"></sub><div class="site-desciption">L Save U</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-home-4-line"></use></svg></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-archive-line"></use></svg></span><span class="site-state-item-count">24</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-folder-2-line"></use></svg></span><span class="site-state-item-count">10</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-price-tag-3-line"></use></svg></span><span class="site-state-item-count">20</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-settings-line"></use></svg></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/mokajun" title="GitHub" target="_blank" style="color:#181717"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-github-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:me@yunyoujun.cn" title="E-Mail" target="_blank" style="color:#8E71C1"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-mail-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://space.bilibili.com/544963185" title="哔哩哔哩动画" target="_blank" style="color:#FF8EB3"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-bilibili-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://travellings.now.sh/" title="Travelling" target="_blank" style="color:var(--hty-text-color)"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-send-plane-2-line"></use></svg></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们pages" style="color:dodgerblue"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-genderless-line"></use></svg></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-contrast-2-line"></use></svg></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis"><span class="toc-number">1.</span> <span class="toc-text">Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Redis"><span class="toc-number">1.1.</span> <span class="toc-text">安装Redis</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8-Redis-%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.2.</span> <span class="toc-text">启动 Redis 服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.3.</span> <span class="toc-text">Redis配置详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redis%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">1.4.</span> <span class="toc-text">redis常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#string"><span class="toc-number">1.5.</span> <span class="toc-text">string</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hash"><span class="toc-number">1.6.</span> <span class="toc-text">hash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#list"><span class="toc-number">1.7.</span> <span class="toc-text">list</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#set"><span class="toc-number">1.8.</span> <span class="toc-text">set</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zset"><span class="toc-number">1.9.</span> <span class="toc-text">zset</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Boot-%E6%95%B4%E5%90%88-Redis"><span class="toc-number">2.</span> <span class="toc-text">Spring Boot 整合 Redis</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis-5-%E7%A7%8D%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">2.1.</span> <span class="toc-text">Redis 5 种数据类型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Redis%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">Redis常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D"><span class="toc-number">3.1.</span> <span class="toc-text">简单介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E7%BC%93%E5%AD%98%E5%B8%B8%E8%A7%81%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="toc-number">3.2.</span> <span class="toc-text">分布式缓存常见的技术选型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#redis%E5%92%8CMemcached%E7%9A%84%E5%8C%BA%E5%88%AB%E5%92%8C%E5%85%B1%E5%90%8C%E7%82%B9"><span class="toc-number">3.2.1.</span> <span class="toc-text">redis和Memcached的区别和共同点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="toc-number">3.3.</span> <span class="toc-text">缓存数据的处理流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8Redis%E7%BC%93%E5%AD%98"><span class="toc-number">3.4.</span> <span class="toc-text">为什么用Redis缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis%E5%8D%95%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.5.</span> <span class="toc-text">Redis单线程模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Redis%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E4%BD%BF%E7%94%A8%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.5.1.</span> <span class="toc-text">Redis为什么不使用多线程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%886-0%E5%BC%95%E5%85%A5%E5%A4%9A%E7%BA%BF%E7%A8%8B%E3%80%82"><span class="toc-number">3.5.2.</span> <span class="toc-text">为什么6.0引入多线程。</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE%E8%AE%BE%E7%BD%AE%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4%E6%9C%89%E5%95%A5%E7%94%A8"><span class="toc-number">3.6.</span> <span class="toc-text">缓存数据设置过期时间有啥用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#R%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E6%95%B0%E6%8D%AE%E6%98%AF%E5%90%A6%E8%BF%87%E6%9C%9F%E5%91%A2%EF%BC%9F"><span class="toc-number">3.7.</span> <span class="toc-text">R如何判断数据是否过期呢？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%87%E6%9C%9F%E6%95%B0%E6%8D%AE%E7%9A%84%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5"><span class="toc-number">3.8.</span> <span class="toc-text">过期数据的删除策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6"><span class="toc-number">3.9.</span> <span class="toc-text">内存淘汰机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E6%9C%BA%E5%88%B6"><span class="toc-number">3.10.</span> <span class="toc-text">持久化机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis%E4%BA%8B%E5%8A%A1"><span class="toc-number">3.11.</span> <span class="toc-text">Redis事务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F"><span class="toc-number">3.12.</span> <span class="toc-text">缓存穿透</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-number">3.12.1.</span> <span class="toc-text">布隆过滤器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF"><span class="toc-number">3.13.</span> <span class="toc-text">缓存击穿</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9"><span class="toc-number">3.14.</span> <span class="toc-text">缓存雪崩</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%BC%93%E5%AD%98%E5%92%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">3.15.</span> <span class="toc-text">如何保证缓存和数据库的一致性</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article"><link itemprop="mainEntityOfPage" href="https://mokajun.github.io/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Redis/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="Moka☆君"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="My Site"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Spring Boot整合Redis</h1><div class="post-meta"><div class="post-time" style="display:block"><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-calendar-line"></use></svg></span> <time title="创建时间：2021-06-08 17:51:40" itemprop="dateCreated datePublished" datetime="2021-06-08T17:51:40+08:00">2021-06-08</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-calendar-2-line"></use></svg></span> <time title="修改时间：2021-06-09 22:07:50" itemprop="dateModified" datetime="2021-06-09T22:07:50+08:00">2021-06-09</time></div><span class="post-count"><span class="post-symbolcount"><span class="post-meta-item-icon" title="本文字数"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-file-word-line"></use></svg></span> <span title="本文字数">7.3k</span><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="阅读时长"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-timer-line"></use></svg></span> <span title="阅读时长">28m</span></span></span><span class="leancloud_visitors" id="/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Redis/" data-flag-title="Spring Boot整合Redis"><span class="post-meta-divider">-</span><span class="post-meta-item-icon" title="阅读次数"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-eye-line"></use></svg> <span class="leancloud-visitors-count"></span></span></span><span class="post-meta-divider">-</span><a href="#comment"><span class="post-meta-item-icon" title="评论数"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-chat-3-line"></use></svg> <span class="waline-comment-count" id="/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Redis/"></span></span></a><div class="post-classify"><span class="post-category"> <span class="post-meta-item-icon" style="margin-right:3px;"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-folder-line"></use></svg></span><span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/Java/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">Java</span></a></span> > <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a class="category-item" href="/categories/Java/SpringBoot/" style="--text-color:var(--hty-text-color)" itemprop="url" rel="index"><span itemprop="text">SpringBoot</span></a></span></span><span class="post-tag"><span class="post-meta-divider">-</span><a class="tag-item" href="/tags/Redis/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-price-tag-3-line"></use></svg></span><span class="tag-name">Redis</span></a></span></div><div class="post-author"><div class="author-avatar"><img src="https://www.gravatar.com/avatar/bdc14936d2897a8c3e35e03bc44a20d4?s=20&amp;d=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2FYunYouJun%2Fcdn%2Fimg%2Favatar%2Fnone.jpg"></div><span class="author-name">Moka☆君</span></div></div><a class="hty-button hty-button--raised" href="/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Redis" style="margin-top: 1rem;background-color:blue">查看链接</a></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body" style="--smc-primary:#000000;"><h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><p>基于内存进⾏存储，⽀持 key-value 的存储形式，底层是⽤ C 语⾔编写的。 基于 key-value 形式的数据字典，结构⾮常简单，没有数据表的概念，直接⽤键值对的形式完成数据的 管理，Redis ⽀持 5 种数据类型：</p>
+<ul>
+<li>  字符串 </li>
+<li>  列表</li>
+<li>  集合 </li>
+<li>  有序集合 </li>
+<li>  哈希</li>
+</ul>
+<h3 id="安装Redis"><a href="#安装Redis" class="headerlink" title="安装Redis"></a>安装Redis</h3><p>Linux系统去官网下，Windows系统去github微软大佬那里下转版</p>
+<p>注意：Windows版没有办法设置后台运行和线程守护，需要额外开一个cmd当server</p>
+<p>以下操作基于Windows</p>
+<h3 id="启动-Redis-服务"><a href="#启动-Redis-服务" class="headerlink" title="启动 Redis 服务"></a>启动 Redis 服务</h3><p>1、启动 redis-server</p>
+<blockquote>
+<p>  Windows：（安装时已经配好环境变量</p>
+</blockquote>
+<pre class="language-none"><code class="language-none">redis-server</code></pre>
+
+<blockquote>
+<p>  Linux:   (需要进⼊ redis ⽬录</p>
+</blockquote>
+<pre class="language-none"><code class="language-none">sudo .&#x2F;bin&#x2F;redis-server .&#x2F;etc&#x2F;redis.conf</code></pre>
+
+<p>2、进⼊ redis ⽬录，启动 redis-cli，启动 Redis 的客户端管理窗⼝，在此窗⼝中即可操作 Redis 数据 库。</p>
+<blockquote>
+<p>  Windows：（安装时已经配好环境变量</p>
+</blockquote>
+<pre class="language-none"><code class="language-none">redis-cli</code></pre>
+
+<blockquote>
+<p>  Linux:</p>
+</blockquote>
+<pre class="language-none"><code class="language-none">.&#x2F;bin&#x2F;redis-cli</code></pre>
+
+<p>3、对数据进⾏操作。</p>
+<pre class="language-none"><code class="language-none">set key value
+get key</code></pre>
+
+<p>4、关闭 Redis 服务。 </p>
+<pre class="language-none"><code class="language-none">shutdown</code></pre>
+
+<p>5、退出客户端</p>
+<pre class="language-none"><code class="language-none">control+c</code></pre>
+
+<h3 id="Redis配置详解"><a href="#Redis配置详解" class="headerlink" title="Redis配置详解"></a>Redis配置详解</h3><pre class="language-yml" data-language="yml"><code class="language-yml">daemonize ： 默认为no，修改为yes启用守护线程
+port ：设定端口号，默认为6379
+bind ：绑定IP地址
+databases ：数据库数量，默认16
+save &lt;second<span class="token punctuation">></span> &lt;changes<span class="token punctuation">></span> ：指定多少时间、有多少次更新操作，就将数据同步到数据文件
+<span class="token comment">#redis默认配置有三个条件，满足一个即进行持久化</span>
+save 900 1 <span class="token comment">#900s有1个更改</span>
+save 300 10 <span class="token comment">#300s有10个更改</span>
+save 60 10000 <span class="token comment">#60s有10000更改</span>
+dbfilename ：指定本地数据库的文件名，默认为dump.rdb
+dir ：指定本地数据库的存放目录，默认为./当前文件夹
+requirepass ：设置密码，默认关闭
+redis <span class="token punctuation">-</span>cli <span class="token punctuation">-</span>h host <span class="token punctuation">-</span>p port <span class="token punctuation">-</span>a password</code></pre>
+
+<h3 id="redis常用命令"><a href="#redis常用命令" class="headerlink" title="redis常用命令"></a>redis常用命令</h3><p>redis五种数据类型：<strong>string、hash、list、set、zset</strong></p>
+<ul>
+<li>  DEL key</li>
+<li>  Dump key：序列化给定key，返回被序列化的值</li>
+<li>  EXIST key：检查KEY是否存在</li>
+<li>  EXPIRE key second：为key设定过期时间</li>
+<li>  TTL key：返回key剩余时间</li>
+<li>  PERSIST key：移除key的过期时间，持久保存</li>
+<li>  KEY pattern：查询所有符号给定模式的key</li>
+<li>  RENAME key：修改key的名称</li>
+<li>  MOVE key db：移动key到指定数据库中</li>
+<li>  TYPE key：返回key所存储的值的类型</li>
+</ul>
+<pre class="language-none"><code class="language-none">EXPIRE key second的使用场景：
+1、限时的优惠活动
+2、网站数据缓存
+3、手机验证码
+4、限制网站访客频率</code></pre>
+
+<h3 id="string"><a href="#string" class="headerlink" title="string"></a>string</h3><p>string类型是二进制安全的，redis的string可以包含任何数据，如图像、序列化对象。一个键最多能存储512MB。二进制安全是指，在传输数据的时候，能保证二进制数据的信息安全，也就是不会被篡改、破译；如果被攻击，能够及时检测出来。</p>
+<p><strong>常用命令</strong></p>
+<ul>
+<li>  <strong>setkey_name value</strong>：命令不区分大小写，但是key_name区分大小写</li>
+<li>  <strong>SETNX key value</strong>：当key不存在时设置key的值。（SET if Not eXists）</li>
+<li>  <strong>get key_name</strong></li>
+<li>  <strong>GETRANGE key start end</strong>：获取key中字符串的子字符串，从start开始，end结束</li>
+<li>  **MGET key1 [key2 …]**：获取多个key</li>
+<li>  <strong>GETSET KEY_NAME VALUE</strong>：设定key的值，并返回key的旧值。当key不存在，返回nil</li>
+<li>  <strong>STRLEN key</strong>：返回key所存储的字符串的长度</li>
+<li>  <strong>INCR KEY_NAME</strong> ：INCR命令key中存储的值+1,如果不存在key，则key中的值话先被初始化为0再加1</li>
+<li>  <strong>INCRBY KEY_NAME</strong> 增量</li>
+<li>  <strong>DECR KEY_NAME</strong>：key中的值自减一</li>
+<li>  <strong>DECRBY KEY_NAME</strong></li>
+<li>  <strong>append key_name value</strong>：字符串拼接，追加至末尾，if不存在，为其赋值</li>
+</ul>
+<p><strong>string的应用场景</strong></p>
+<p>1、String通常用于保存单个字符串或JSON字符串数据</p>
+<p>2、因为String是二进制安全的，所以可以把保密要求高的<strong>图片文件内容</strong>作为字符串来存储</p>
+<p>3、计数器：常规Key-Value缓存应用，如微博数、粉丝数。INCR本身就具有原子性特性，所以不会有线程安全问题 。</p>
+<h3 id="hash"><a href="#hash" class="headerlink" title="hash"></a>hash</h3><p>Redis hash是一个string类型的field和value的映射表，<strong>hash特别适用于存储对象</strong>。每个hash可以存储232-1键值对。可以看成KEY和VALUE的MAP容器。相比于JSON，hash占用很少的内存空间。</p>
+<p><strong>常用命令</strong></p>
+<ul>
+<li>  HSET key_name field value：为指定的key设定field和value</li>
+<li>  hmset key field value[field1,value1]</li>
+<li>  hget key field</li>
+<li>  hmget key field[field1]</li>
+<li>  hgetall key：返回hash表中所有字段和值</li>
+<li>  hkeys key：获取hash表所有字段</li>
+<li>  hlen key：获取hash表中的字段数量</li>
+<li>  -hdel key field [field1]：删除一个或多个hash表的字段</li>
+</ul>
+<p><strong>hash的应用场景</strong></p>
+<p>hash的应用场景，通常用来存储一个用户信息的对象数据</p>
+<p>1、相比于存储对象的string类型的json串，json串修改单个属性需要将整个值取出来。而hash不需要</p>
+<p>2、相比于多个key-value存储对象，hash节省了很多内存空间</p>
+<p>3、如果hash的属性值被删除完，那么hash的key也会被redis删除</p>
+<h3 id="list"><a href="#list" class="headerlink" title="list"></a>list</h3><p>类似于java中的LinkedList</p>
+<p><strong>常用命令</strong></p>
+<ul>
+<li>  lpush key value1 [value2]</li>
+<li>  rpush key value1 [value2]</li>
+<li>  lpushx key value：从左侧插入值，如果list不存在，则不操作</li>
+<li>  rpushx key value：从右侧插入值，如果list不存在，则不操作</li>
+<li>  llen key：获取列表长度</li>
+<li>  lindex key index：获取指定索引的元素</li>
+<li>  lrange key start stop：获取列表指定范围的元素</li>
+<li>  lpop key ：从左侧移除第一个元素</li>
+<li>  prop key：移除列表最后一个元素</li>
+<li>  blpop key [key1] timeout：移除并获取列表第一个元素，如果列表没有元素会阻塞列表到等待超时或发现可弹出元素为止</li>
+<li>  brpop key [key1] timeout：移除并获取列表最后一个元素，如果列表没有元素会阻塞列表到等待超时或发现可弹出元素为止</li>
+<li>  ltrim key start stop ：对列表进行修改，让列表只保留指定区间的元素，不在指定区间的元素就会被删除</li>
+<li>  lset key index value ：指定索引的值</li>
+<li>  linsert key before|after world value：在列表元素前或则后插入元素</li>
+</ul>
+<p><strong>应用场景</strong></p>
+<p>1、对数据大的集合数据删减 列表显示、关注列表、粉丝列表、留言评价…分页、热点新闻等</p>
+<p>2、任务队列 list通常用来实现一个消息队列，而且可以确保先后顺序，不必像MySQL那样通过order by来排序</p>
+<p><strong>补充</strong></p>
+<p>rpoplpush list1 list2 移除list1最后一个元素，并将该元素添加到list2并返回此元素。用此命令可以实现订单下单流程、用户系统登录注册短信等。</p>
+<h3 id="set"><a href="#set" class="headerlink" title="set"></a>set</h3><p>唯一、无序</p>
+<p><strong>常用命令</strong></p>
+<ul>
+<li>  sadd key value1[value2]：向集合添加成员</li>
+<li>  scard key：返回集合成员数</li>
+<li>  smembers key：返回集合中所有成员</li>
+<li>  sismember key member：判断memeber元素是否是集合key成员的成员</li>
+<li>  srandmember key [count]：返回集合中一个或多个随机数</li>
+<li>  srem key member1 [member2]：移除集合中一个或多个成员</li>
+<li>  spop key：移除并返回集合中的一个随机元素</li>
+<li>  smove source destination member：将member元素从source集合移动到destination集合</li>
+<li>  sdiff key1 [key2]：返回所有集合的差集</li>
+<li>  sdiffstore destination key1[key2]：返回给定所有集合的差集并存储在destination中</li>
+</ul>
+<p><strong>应用场景</strong></p>
+<p>对两个集合间的数据【计算】进行交集、并集、差集运算</p>
+<p>1、以非常方便的实现如共同关注、共同喜好、二度好友等功能。对上面的所有集合操作，你还可以使用不同的命令选择将结果返回给客户端还是存储到一个新的集合中。</p>
+<p>2、利用唯一性，可以统计访问网站的所有独立 IP</p>
+<h3 id="zset"><a href="#zset" class="headerlink" title="zset"></a>zset</h3><p>有序且不重复、每个元素都会关联一个double类型的分数，redis通过分数进行从小到大的排序。分数可以重复</p>
+<p><strong>常用命令</strong></p>
+<ul>
+<li>  ZADD key score1 memeber1</li>
+<li>  ZCARD key ：获取集合中的元素数量</li>
+<li>  ZCOUNT key min max 计算在有序集合中指定区间分数的成员数</li>
+<li>  ZCOUNT key min max 计算在有序集合中指定区间分数的成员数</li>
+<li>  ZRANK key member：返回有序集合指定成员的索引</li>
+<li>  ZREVRANGE key start stop ：返回有序集中指定区间内的成员，通过索引，分数从高到底</li>
+<li>  ZREM key member [member …] 移除有序集合中的一个或多个成员</li>
+<li>  ZREMRANGEBYRANK key start stop 移除有序集合中给定的排名区间的所有成员(第一名是0)(低到高排序）</li>
+<li>  ZREMRANGEBYSCORE key min max 移除有序集合中给定的分数区间的所有成员</li>
+</ul>
+<p><strong>应用场景</strong></p>
+<p>常用于排行榜</p>
+<p>1、推特可以以发表时间作为score存储</p>
+<p>2、存储成绩</p>
+<p>3、做带权重的队列，让重要的任务先执行</p>
+<h2 id="Spring-Boot-整合-Redis"><a href="#Spring-Boot-整合-Redis" class="headerlink" title="Spring Boot 整合 Redis"></a>Spring Boot 整合 Redis</h2><p>Spring Boot整合Spring Data Redis 框架 操作 Redis。 </p>
+<p>1、创建 Maven ⼯程。</p>
+<pre class="language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>parent</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-parent<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>2.1.5.RELEASE<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>parent</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependencies</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-web<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.springframework.boot<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>spring-boot-starter-data-redis<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token comment">&lt;!--   这是redis数据池工具     --></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.apache.commons<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>commons-pool2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>org.projectlombok<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>lombok<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependencies</span><span class="token punctuation">></span></span></code></pre>
+
+<p>2、创建实体类，实现<strong>序列化接⼝</strong>，否则⽆法持久化存⼊ Redis 数据库。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">com<span class="token punctuation">.</span>southwind<span class="token punctuation">.</span>entity</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">lombok<span class="token punctuation">.</span></span><span class="token class-name">Data</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">Serializable</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>util<span class="token punctuation">.</span></span><span class="token class-name">Date</span><span class="token punctuation">;</span>
+<span class="token annotation punctuation">@Data</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Student</span> <span class="token keyword">implements</span> <span class="token class-name">Serializable</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Integer</span> id<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> name<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Double</span> score<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">Date</span> birthday<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>3、创建控制器。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">com<span class="token punctuation">.</span>southwind<span class="token punctuation">.</span>controller</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">com<span class="token punctuation">.</span>southwind<span class="token punctuation">.</span>entity<span class="token punctuation">.</span></span><span class="token class-name">Student</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>beans<span class="token punctuation">.</span>factory<span class="token punctuation">.</span>annotation<span class="token punctuation">.</span></span><span class="token class-name">Autowired</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>data<span class="token punctuation">.</span>redis<span class="token punctuation">.</span>core<span class="token punctuation">.</span></span><span class="token class-name">RedisTemplate</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>web<span class="token punctuation">.</span>bind<span class="token punctuation">.</span>annotation<span class="token punctuation">.</span></span><span class="token operator">*</span><span class="token punctuation">;</span>
+<span class="token annotation punctuation">@RestController</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">StudentHandler</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">//由data.redis.提供的实例化对象</span>
+    <span class="token comment">//实际使用过程中还需要调用opsForValue()，返回一个ValueOperations&lt;K, V></span>
+    <span class="token comment">//ValueOperations&lt;K, V>相当于将redis储存的key-value进行了抽象化，体现了面向对象编程思想</span>
+    <span class="token annotation punctuation">@Autowired</span>
+    <span class="token keyword">private</span> <span class="token class-name">RedisTemplate</span> redisTemplate<span class="token punctuation">;</span>
+
+
+    <span class="token annotation punctuation">@PostMapping</span><span class="token punctuation">(</span><span class="token string">"/set"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">set</span><span class="token punctuation">(</span><span class="token annotation punctuation">@RequestBody</span> <span class="token class-name">Student</span> student<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        redisTemplate<span class="token punctuation">.</span><span class="token function">opsForValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"student"</span><span class="token punctuation">,</span>student<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/get/&#123;key&#125;"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token class-name">Student</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"key"</span><span class="token punctuation">)</span> <span class="token class-name">String</span> key<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token class-name">Student</span><span class="token punctuation">)</span> redisTemplate<span class="token punctuation">.</span><span class="token function">opsForValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token annotation punctuation">@DeleteMapping</span><span class="token punctuation">(</span><span class="token string">"/delete/&#123;key&#125;"</span><span class="token punctuation">)</span>
+    <span class="token keyword">public</span> <span class="token keyword">boolean</span> <span class="token function">delete</span><span class="token punctuation">(</span><span class="token annotation punctuation">@PathVariable</span><span class="token punctuation">(</span><span class="token string">"key"</span><span class="token punctuation">)</span> <span class="token class-name">String</span> key<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+        redisTemplate<span class="token punctuation">.</span><span class="token function">delete</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> redisTemplate<span class="token punctuation">.</span><span class="token function">hasKey</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>4、创建配置⽂件 application.yml</p>
+<pre class="language-yml" data-language="yml"><code class="language-yml"><span class="token key atrule">spring</span><span class="token punctuation">:</span>
+	<span class="token key atrule">redis</span><span class="token punctuation">:</span>
+		<span class="token key atrule">database</span><span class="token punctuation">:</span> <span class="token number">0</span>
+		<span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
+		<span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">6379</span></code></pre>
+
+<p>5、创建启动类</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">com<span class="token punctuation">.</span>southwind</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>boot<span class="token punctuation">.</span></span><span class="token class-name">SpringApplication</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>boot<span class="token punctuation">.</span>autoconfigure<span class="token punctuation">.</span></span><span class="token class-name">SpringBootApplication</span><span class="token punctuation">;</span>
+<span class="token annotation punctuation">@SpringBootApplication</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Application</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">SpringApplication</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token class-name">Application</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">,</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+
+
+<h3 id="Redis-5-种数据类型"><a href="#Redis-5-种数据类型" class="headerlink" title="Redis 5 种数据类型"></a>Redis 5 种数据类型</h3><p>字符串</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/string"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">stringTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    redisTemplate<span class="token punctuation">.</span><span class="token function">opsForValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">"str"</span><span class="token punctuation">,</span><span class="token string">"Hello World"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">String</span> str <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">)</span> redisTemplate<span class="token punctuation">.</span><span class="token function">opsForValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"str"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> str<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>列表</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/list"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> <span class="token function">listTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">ListOperations</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">String</span><span class="token punctuation">></span></span> listOperations <span class="token operator">=</span> redisTemplate<span class="token punctuation">.</span><span class="token function">opsForList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    listOperations<span class="token punctuation">.</span><span class="token function">leftPush</span><span class="token punctuation">(</span><span class="token string">"list"</span><span class="token punctuation">,</span><span class="token string">"Hello"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    listOperations<span class="token punctuation">.</span><span class="token function">leftPush</span><span class="token punctuation">(</span><span class="token string">"list"</span><span class="token punctuation">,</span><span class="token string">"World"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    listOperations<span class="token punctuation">.</span><span class="token function">leftPush</span><span class="token punctuation">(</span><span class="token string">"list"</span><span class="token punctuation">,</span><span class="token string">"Java"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> list <span class="token operator">=</span> listOperations<span class="token punctuation">.</span><span class="token function">range</span><span class="token punctuation">(</span><span class="token string">"list"</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> list<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>集合</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/set"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> <span class="token function">setTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">SetOperations</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">String</span><span class="token punctuation">></span></span> setOperations <span class="token operator">=</span> redisTemplate<span class="token punctuation">.</span><span class="token function">opsForSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    setOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">,</span><span class="token string">"Hello"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    setOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">,</span><span class="token string">"Hello"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    setOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">,</span><span class="token string">"World"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    setOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">,</span><span class="token string">"World"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    setOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">,</span><span class="token string">"Java"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    setOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">,</span><span class="token string">"Java"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> set <span class="token operator">=</span> setOperations<span class="token punctuation">.</span><span class="token function">members</span><span class="token punctuation">(</span><span class="token string">"set"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> set<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>有序集合</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@GetMapping</span><span class="token punctuation">(</span><span class="token string">"/zset"</span><span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> <span class="token function">zsetTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+    <span class="token class-name">ZSetOperations</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">String</span><span class="token punctuation">></span></span> zSetOperations <span class="token operator">=</span> redisTemplate<span class="token punctuation">.</span><span class="token function">opsForZSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    zSetOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"zset"</span><span class="token punctuation">,</span><span class="token string">"Hello"</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    zSetOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"zset"</span><span class="token punctuation">,</span><span class="token string">"World"</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    zSetOperations<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token string">"zset"</span><span class="token punctuation">,</span><span class="token string">"Java"</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token class-name">Set</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> set <span class="token operator">=</span> zSetOperations<span class="token punctuation">.</span><span class="token function">range</span><span class="token punctuation">(</span><span class="token string">"zset"</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> set<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>哈希</p>
+<p>HashMap key value </p>
+<p>HashOperations key hashkey value </p>
+<p>key 是每⼀组数据的 ID，hashkey 和 value 是⼀组完整的 HashMap 数据，通过 key 来区分不同的 HashMap。</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token class-name">HashMap</span> hashMap1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hashMap1<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>key1<span class="token punctuation">,</span>value1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token class-name">HashMap</span> hashMap2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hashMap2<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>key2<span class="token punctuation">,</span>value2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token class-name">HashMap</span> hashMap3 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HashMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hashMap3<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>key3<span class="token punctuation">,</span>value3<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token class-name">HashOperations</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">String</span><span class="token punctuation">,</span><span class="token class-name">String</span><span class="token punctuation">></span></span> hashOperations <span class="token operator">=</span>
+redisTemplate<span class="token punctuation">.</span><span class="token function">opsForHash</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hashOperations<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>hashMap1<span class="token punctuation">,</span>key1<span class="token punctuation">,</span>value1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+hashOperations<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>hashMap2<span class="token punctuation">,</span>key2<span class="token punctuation">,</span>value2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+hashOperations<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>hashMap3<span class="token punctuation">,</span>key3<span class="token punctuation">,</span>value3<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="Redis常见问题"><a href="#Redis常见问题" class="headerlink" title="Redis常见问题"></a>Redis常见问题</h2><h3 id="简单介绍"><a href="#简单介绍" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>使用C语言开发的k-v数据库，数据存储在内存，读写速度很快，一般用于缓存方向，也可以用来做分布式锁，消息队列。提供了五中数据类型String,hash,list,set,zset。支持事务，持久化，lua脚本，多重集群方案。</p>
+<h3 id="分布式缓存常见的技术选型"><a href="#分布式缓存常见的技术选型" class="headerlink" title="分布式缓存常见的技术选型"></a>分布式缓存常见的技术选型</h3><p><strong>Memcached</strong>和<strong>Redis</strong>。</p>
+<p>前者是分布式缓存刚兴起，后来随着Redis发展，都是用redis了。分布式缓存主要解决的问题是，单击缓存的容量收到服务器限制且无法保存通用的消息。因为本地缓存只在当前服务有效。</p>
+<h4 id="redis和Memcached的区别和共同点"><a href="#redis和Memcached的区别和共同点" class="headerlink" title="redis和Memcached的区别和共同点"></a>redis和Memcached的区别和共同点</h4><p><strong>共同点：</strong></p>
+<ul>
+<li>  基于内存</li>
+<li>  过期策略</li>
+<li>  高性能</li>
+</ul>
+<p><strong>区别：</strong></p>
+<ul>
+<li>  redis数据类型更丰富-五种，后者只是简单的k-v</li>
+<li>  redis数据持久化，重启的时候可以再次加载使用。后者单纯放在内存。</li>
+<li>  redis灾难恢复机制。因为可以持久化</li>
+<li>  redis在内存用完之后，可以将数据放磁盘，后者直接报异常。</li>
+<li>  M没有原生的集群模式。redis原生支持cluster模式</li>
+<li>  M多线程非阻塞IO复用的网络模型；R单线程多路IO复用模型（R6.0之后引入多线程）</li>
+<li>  R支持发布订阅模型，Lua脚本，事务。M不支持。</li>
+<li>  M过期数据只用了惰性删除，R使用了惰性删除和定期删除。</li>
+</ul>
+<h3 id="缓存数据的处理流程"><a href="#缓存数据的处理流程" class="headerlink" title="缓存数据的处理流程"></a>缓存数据的处理流程</h3><ul>
+<li>  数据在缓存直接返回</li>
+<li>  不在缓存查数据库</li>
+<li>  数据库存在更新缓存</li>
+<li>  数据库不在返回空</li>
+</ul>
+<h3 id="为什么用Redis缓存"><a href="#为什么用Redis缓存" class="headerlink" title="为什么用Redis缓存"></a>为什么用Redis缓存</h3><p><strong>高性能：</strong></p>
+<p>直接访问数据库会比较慢，因为要从次硬盘读取。对于某些不常改变的高频数据，可以放在缓存中，访问时直接存缓存读取，这样比较快。需要保证数据一致性，当数据库的数据改变时，缓存的数据也要同步更新。</p>
+<p><strong>高并发：</strong></p>
+<p>MYSQL的QPS在1W左右（4core 8G），使用R之后可以达到10W-30W+。</p>
+<blockquote>
+<p>  QPS：服务器每秒可以执行的查询次数。</p>
+</blockquote>
+<h3 id="Redis单线程模型"><a href="#Redis单线程模型" class="headerlink" title="Redis单线程模型"></a>Redis单线程模型</h3><blockquote>
+<p>  Redis 基于 Reactor 模式开发了自己的网络事件处理器：这个处理器被称为文件事件处理器（file event handler）。文件事件处理器使用 I/O 多路复用（multiplexing）程序来同时监听多个套接字，并根据 套接字目前执行的任务来为套接字关联不同的事件处理器。</p>
+<p>  当被监听的套接字准备好执行连接应答（accept）、读取（read）、写入（write）、关 闭（close）等操作时，与操作相对应的文件事件就会产生，这时文件事件处理器就会调用套接字之前关联好的事件处理器来处理这些事件。</p>
+<p>  <strong>虽然文件事件处理器以单线程方式运行，但通过使用 I/O 多路复用程序来监听多个套接字</strong>，文件事件处理器既实现了高性能的网络通信模型，又可以很好地与 Redis 服务器中其他同样以单线程方式运行的模块进行对接，这保持了 Redis 内部单线程设计的简单性。</p>
+</blockquote>
+<p>可以看出，文本事件处理器主要是4个部分：</p>
+<ul>
+<li>  多个socket（客户端连接）</li>
+<li>  IO多路复用（支持多个客户端连接的关键）</li>
+<li>  文本事件分派器（将socket关联到相应的时间处理器）</li>
+<li>  事件处理器（连接应答处理器、命令请求处理器、命令回复处理器）</li>
+</ul>
+<p><img src="https://i.loli.net/2021/06/08/OqIPJFhWATtD4Ng.png" alt="image-20210325164739624" loading="lazy"></p>
+<h4 id="Redis为什么不使用多线程"><a href="#Redis为什么不使用多线程" class="headerlink" title="Redis为什么不使用多线程"></a>Redis为什么不使用多线程</h4><p>单线程模型，但是在4.0之后就加入了对多线程的支持。但是多线程主要是针对一些大键值对的删除操作的命令。</p>
+<p>大体来说R还是单线程处理，为何不使用多线程？</p>
+<ul>
+<li>  单线程编程容易且易维护</li>
+<li>  性能瓶颈不在CPU，在于内存和网络</li>
+<li>  多线程存在死锁，线程上下文切换问题，甚至影响性能。</li>
+</ul>
+<h4 id="为什么6-0引入多线程。"><a href="#为什么6-0引入多线程。" class="headerlink" title="为什么6.0引入多线程。"></a>为什么6.0引入多线程。</h4><p>主要是为了提高网络IO性能瓶颈。</p>
+<p>虽然6.0引入多线程，但是只在网路数据的读写这类耗时操作使用，执行命令仍然是单线程。默认是禁用的。</p>
+<p>开多线程之后，还需要设置线程数，否则不生效。</p>
+<pre class="language-none"><code class="language-none">COPYio-threads 4 #官网建议4核的机器建议设置为2或3个线程，8核的建议设置为6个线程</code></pre>
+
+<h3 id="缓存数据设置过期时间有啥用"><a href="#缓存数据设置过期时间有啥用" class="headerlink" title="缓存数据设置过期时间有啥用"></a>缓存数据设置过期时间有啥用</h3><p>内存有限。</p>
+<p>业务场景需要。(token，短信验证码)</p>
+<h3 id="R如何判断数据是否过期呢？"><a href="#R如何判断数据是否过期呢？" class="headerlink" title="R如何判断数据是否过期呢？"></a>R如何判断数据是否过期呢？</h3><p>过期字典来保存过期时间。过期字典的k指向数据库的某个key，保存了数据库键的过期时间（毫秒精度的unix时间戳)</p>
+<h3 id="过期数据的删除策略"><a href="#过期数据的删除策略" class="headerlink" title="过期数据的删除策略"></a>过期数据的删除策略</h3><ul>
+<li><p>定时删除：创建一个定时器，当key设置有过期实践，且过期时间到达时，由定时器任务立即执行对键的删除操作</p>
+<ul>
+<li>  优点：节约内存，到时就删除，快速释放掉不必要的内存占用</li>
+<li>  缺点：CPU压力很大，无论CPU此时负载量多高，均占用CPU，会影响redis服务器相应时间和指令吞吐</li>
+<li>  总结：用处理器性能换取存储空间（时间换空间）</li>
+</ul>
+</li>
+<li><p>惰性删除：数据到达过期时间，不做处理，等下次访问该数据时进行处理，如未过期，返回数据，发现已过期，删除，返回不存在</p>
+<ul>
+<li>  优点：节约CPU性能，发现必须删除的时候才删除</li>
+<li>  缺点：内存压力很大，出现长期占用内存的数据</li>
+<li>  总结：用存储空间换取处理器性能（空间换时间）</li>
+</ul>
+</li>
+<li><p>  定期删除：周期性轮询redis库中的时效性数据，采用随机抽取的策略，利用过期数据占用的方式控制删除频度。并且，Redis 底层会通过限制删除操作执行的时长和频率来减少删除操作对CPU时间的影响。</p>
+</li>
+</ul>
+<p>一种是内存友好，一种CPU友好，所以R是定期=定时+惰性。</p>
+<p>仅仅通过Key的过期时间有问题，因为可能存在定期删除和惰性漏掉的问题，这样导致大量过期Key堆积在内存。</p>
+<h3 id="内存淘汰机制"><a href="#内存淘汰机制" class="headerlink" title="内存淘汰机制"></a>内存淘汰机制</h3><ul>
+<li>  volatile-lru：从已设置过期时间的数据集挑选最少使用的数据淘汰</li>
+<li>  V-ttl：从已设置过期时间的数据集挑选将要过期的数据淘汰。</li>
+<li>  V-random：字面意思</li>
+<li>  allkeys-lru：<strong>当内存不足以容纳写入新数据时，在键空间中，移除最近最少使用的 key（这个是最常用的）</strong></li>
+<li>  a-random：从数据集（server.db[i].dict）中任意选择数据淘汰</li>
+<li>  no-evition：禁止驱逐数据，也就是说当内存不足以容纳新写入数据时，新写入操作会报错。这个应该没人使用吧！</li>
+</ul>
+<p>4.0版本以后增加了两种：</p>
+<ul>
+<li>  v-lfu：从已设置过期时间的数据集(server.db[i].expires)中挑选最不经常使用的数据淘汰</li>
+<li>  a-lfu：当内存不足以容纳新写入数据时，在键空间中，移除最不经常使用的 key</li>
+</ul>
+<h3 id="持久化机制"><a href="#持久化机制" class="headerlink" title="持久化机制"></a>持久化机制</h3><p><strong>快照和只追加文件</strong></p>
+<ul>
+<li><p>快照持久化</p>
+<p>  通过创建快照的方式获得存储在内存里面的数据的某个时间节点的副本。创建快照后可以进行备份，或者复制到其他服务器从而常创建具有相同数据的服务器副本（主从结构）。</p>
+<p>  快照是默认的持久化方式</p>
+</li>
+<li><p>AOF持久化</p>
+<p>  实时性更好，成为主流的方案，默认不开启，通过appendonly yes开启。</p>
+<p>  开启后，每次执行一条更改Redis的命令，redis就会将命写入AOF文件。默认的文件时appendonly.aof。</p>
+<p>  在redis存在三种不同的AOF持久化方式，分别是：</p>
+<ul>
+<li>  appendsync always # 每次更细都写AOF</li>
+<li>  appendsync everysec # 每秒钟同步一次</li>
+<li>  appendsync no # OS决定什么时候同步</li>
+</ul>
+<p>  兼顾数据和写入性能，选择everysec。对性能几乎没影响。</p>
+</li>
+</ul>
+<h3 id="Redis事务"><a href="#Redis事务" class="headerlink" title="Redis事务"></a>Redis事务</h3><p>通过<code>MULTI</code>,<code>EXEC</code>,<code>DISCARD</code>,<code>WATCH</code>命令实现事务。使用 <a target="_blank" rel="noopener" href="https://redis.io/commands/multi">MULTI</a>命令后可以输入多个命令。Redis不会立即执行这些命令，而是将它们放到队列，当调用了<a target="_blank" rel="noopener" href="https://redis.io/commands/exec">EXEC</a>命令将执行所有命令。</p>
+<p>R的事务和数据库的事务不太一样，事务四大特性：</p>
+<ul>
+<li>  原子性：动作要么全部完成，要么不起作用。</li>
+<li>  一致性：事务提交后，数据保持一致，多个事务对同一个数据库读取的结果是相同的。</li>
+<li>  隔离性：并发访问数据库，一个用户的事务不被打扰，并发事务之间数据库是独立的。</li>
+<li>  持久性：一个事物提交后，对数据的改变是持久的，及时数据库发生故障也不能有任何影响。</li>
+</ul>
+<p>Redis不支持回滚，不满足原子性。而且不满足持久性。为啥呢？因为他们认为没必要回滚，这样更简单且性能更好。Redis开发者觉得即使命令执行错误也应该在开发过程中就被发现而不是生产过程中。</p>
+<p>R的事务可以理解为：提供了一种将多个命令请求打包的功能，然后再按照顺序执行所有命令，并且不会被中途打断。</p>
+<h3 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h3><ul>
+<li><p>是啥？</p>
+<p>  大量请求的Key不在缓存，直接到数据库。黑客故意制造缓存中不存在的Key请求，导致大量请求落到数据库。</p>
+</li>
+<li><p>如何解决？</p>
+<p>  最基本的是做好参数校验，不合法的参数直接返回客户端，例如ID不小于0，邮箱格式等。</p>
+<ul>
+<li><p>缓存无效key</p>
+<p>  缓存和数据库都查不到，就缓存这个无效key，适用于key变化不频繁的情况。会导致缓存大量无效key，可以尽量将key的过期时间设置短一点，例如1min。</p>
+</li>
+<li><p>布隆过滤器</p>
+<p>  通过它可以方便的判断一个给定数据是否存在于海量数据中。具体的做法是：把所有可能的请求的值放在过滤器，请求过来，先判断请求的值是否在过滤器，不存在的话，返回参数信息错误。存在的话，再去走缓存的流程。</p>
+<p>  过滤器时候存在，小概率<strong>误判</strong>；说不存在，一定不存在。</p>
+<ul>
+<li><p>元素加入过滤器</p>
+<p>  1.使用过滤器中的哈希函数对元素值计算，得到哈希值。(几个哈希函数得到几个哈希值)</p>
+<p>  2.根据得到的哈希值，数组中对应的下标标记为1</p>
+</li>
+<li><p>判断是否存在</p>
+<p>  1.对给定元素计算哈希值。</p>
+<p>  2.得到值之后判断数组中的每个元素位置是否都为1，是，说明在过滤器，存在一个值不是1，说明不在。</p>
+</li>
+</ul>
+<p>  有一种情况：不同字符串可能哈希出来的位置相同。(哈希冲突,最原始的问题)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h4><p>就是一个很长的数组，在存入数据的过程中，先通过三次（也可能是更多次）的哈希计算，然后把这些hash的值都标记为1，在查询的时候，先通过三次hash值，然后去查数组，有一个不是1，则数据一定不存在。但是过滤器很难实现删除操作，本质原因是没有解决哈希冲突。</p>
+<p>相比于传统的 List、Set、Map 等数据结构，布隆过滤器是一个bit数组, 它更高效、占用空间更少，但是缺点是其返回的结果是概率性的，而不是确切的。</p>
+<p><img src="https://i.loli.net/2021/06/08/xUsVb6dIJT2ekXH.jpg" alt="1594722485580_ç¼å­ç©¿é02.jpg" loading="lazy"></p>
+<p>如果我们要映射一个值到布隆过滤器中，我们需要使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1，例如针对值 “zhangsan” 和三个不同的哈希函数分别生成了哈希值 1、4、7</p>
+<p><img src="https://i.loli.net/2021/06/08/9HWR3kJU8qgK7wZ.jpg" alt="1594722507245_ç¼å­ç©¿é03.jpg" loading="lazy"></p>
+<p>我们现在再存一个值 “lisi”，如果哈希函数返回 4、5、8 的话，图继续变为：</p>
+<p><img src="https://i.loli.net/2021/06/08/UBAaqXYTfKHPMus.jpg" alt="1594722544253_ç¼å­ç©¿é04.jpg" loading="lazy"></p>
+<p>当我们想要判断布隆过滤器是否记录了某个数据时，布隆过滤器会先对该数据进行同样的哈希处理, 比如 “wangwu”的哈希函数返回了 2、5、8三个值，结果我们发现 2 这个 bit 位上的值为 0，说明没有任何一个值映射到这个 bit 位上，因此我们可以很确定地说 “wangwu” 这个数据不存在。</p>
+<p>但是同时我们会发现，4 这个 bit 位由于”zhangsan”和”lisi”的哈希函数都返回了这个 bit 位，因此它被覆盖了。那么随着布隆过滤器保存的数据不断增多, 重复的概率就会不断增大, 所以当我们过滤某个数据时, 如果发现其三个哈希值都在过滤器中进行了记录, 那么也只能说明过滤器中可能包含了该数据, 并不能绝对肯定, 因为可能是其他数据的哈希值对结果产生了影响.这也就解释了上文所说的 布隆过滤器只能说明“某样东西一定不存在或者可能存在”.至于为什么采用三种不同的哈希函数取值, 因为三个哈希值只要有一个不存在就说明数据一定不在过滤器中, 这样做是可以减小因哈希碰撞(两个数据的哈希值相同)产生的错误概率.</p>
+<p>优点是插入和删除很快。保密性好，因为只存0和1.</p>
+<p>缺点就是不好删除；容易出现误判，原因是哈希冲突。问题就是如何去计量避免误判呢？</p>
+<p>布隆过滤器在很多语言中都有封装的工具包。</p>
+<pre class="language-none"><code class="language-none">COPYpublic class test&#123;
+        private static int size &#x3D; 1000000;
+        &#x2F;&#x2F;期望的误判率
+        private static double fpp &#x3D; 0.01;
+        &#x2F;&#x2F;布隆过滤器
+        private static BloomFilter&lt;Integer&gt; bloomFilter &#x3D; BloomFilter.create(Funnels.integerFunnel(),size,fpp);
+        private static int total &#x3D; 1000000;
+        psvm&#123;
+            &#x2F;&#x2F;插入10万样本数据
+            for(int i &#x3D; 0;i&lt;total;i++)&#123;
+                bloomFilter.put(i);
+            &#125;
+            
+            &#x2F;&#x2F;用另外十万测试数据，测试误判率
+            int count &#x3D; 0;
+            for(int i &#x3D; total;i&lt;total+100000;i++)&#123;
+                if(bloomFilter.mightContain(i))&#123;
+                    count++;
+                    sout(i+&quot;误判了&quot;);
+                &#125;
+            &#125;
+            sout(&quot;总的误判数是：&quot;+count);
+        &#125;
+&#125;</code></pre>
+
+<p>但是误判率不能设置成无线小，这会拖慢过滤器的计算速度。</p>
+<blockquote>
+<p>  误判率的底层原理：</p>
+<p>  给出更多的哈希函数和数组空间留待命中，使用多个哈希函数算出来的哈希位置也不一样，多对应的二进制数据也就越多，这样就可以减少重复的概率。</p>
+</blockquote>
+<p><strong>使用布隆过滤器解决redis缓存穿透的问题：</strong></p>
+<p>将数据库的数据全部存放在布隆过滤器上，先查过滤器。没有返回，有的哈，从redis查找。</p>
+<pre class="language-none"><code class="language-none">COPYpublic class RedisBloomFilter&#123;
+    psvm&#123;
+        Config config &#x3D; new Config();
+        config.useSingleServer.setSddress(&quot;redis:&#x2F;&#x2F;127.0.0.1:6379&quot;);
+        config.useSingleServer().setPassword(&quot;1234&quot;);
+        &#x2F;&#x2F;构造过滤器
+        RedissonClient redisson &#x3D; Redisson.create(config);
+        RBloomFilter&lt;String&gt; bloomFilter &#x3D; redisson.getBloomFilter(&quot;phoneList&quot;);
+        &#x2F;&#x2F;初始化过滤器，预计元素是1000000L,误差率是3%
+        bloomFilter.tryInit(10000L,0.03);
+        &#x2F;&#x2F;将号码10086插入到过滤器
+        bloomFilter.put(&quot;10086&quot;);
+        
+        &#x2F;&#x2F;判断号码是否在过滤器
+        sout(bloomFilter.contains(&quot;123456&quot;));
+    &#125;
+&#125;</code></pre>
+
+
+
+<h3 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h3><p><strong>描述：</strong></p>
+<p>   缓存击穿是指缓存中没有，但数据库中有的数据（一般是缓存时间到期），这时由于并发用户特别多，同时读缓存没读到数据，又同时去数据库去取数据，引起数据库压力瞬间增大，造成过大压力</p>
+<p>   <strong>解决方案：</strong></p>
+<ol>
+<li> 设置热点数据永远不过期。</li>
+<li> 加互斥锁，互斥锁参考代码如下：</li>
+</ol>
+<p><img src="https://i.loli.net/2021/06/08/bPKqIt2kUz7waD5.png" alt="img" loading="lazy"></p>
+<h3 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h3><p>缓存在同一时间大面积失效,后面的请求落在数据库，造成短时间内数据库承受大量请求。（缓存模块宕机）</p>
+<p>还有一种是有一些被大量访问的数据在某一时刻失效，导致请求落在数据库。</p>
+<p><strong>解决办法：</strong></p>
+<ul>
+<li>缓存服务宕机<ul>
+<li>  redis集群</li>
+<li>  限流，避免同时处理大量请求。</li>
+</ul>
+</li>
+<li>热点缓存失效：<ul>
+<li>  设置不同的失效时间比如随机设置缓存的失效时间。</li>
+<li>  缓存永不失效。</li>
+<li>  如果缓存数据库是分布式部署，将热点数据均匀分布在不同得缓存数据库中。</li>
+</ul>
+</li>
+</ul>
+<h3 id="如何保证缓存和数据库的一致性"><a href="#如何保证缓存和数据库的一致性" class="headerlink" title="如何保证缓存和数据库的一致性"></a>如何保证缓存和数据库的一致性</h3><p><strong>旁路缓存模式</strong></p>
+<p>遇到写请求是这样的，更新DB，直接删除缓存。</p>
+<p>数据库更新成功缓存删除失败，两个方案：</p>
+<ul>
+<li>  缓存失效时间变短（不推荐）：我们让缓存数据的过期时间变短，这样的话缓存就会从数据库中加载数据。另外，这种解决办法对于先操作缓存后操作数据库的场景不适用。</li>
+<li>  增加cache更新重试机制（常用）：如果 cache 服务当前不可用导致缓存删除失败的话，我们就隔一段时间进行重试，重试次数可以自己定。如果多次重试还是失败的话，我们可以把当前更新失败的 key 存入队列中，等缓存服务可用之后，再将 缓存中对应的 key 删除即可。</li>
+</ul>
+</div><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-hand-coin-line"></use></svg></span><div id="reward-comment">I'm so cute. Please give me money.</div><div id="qr" style="display:none;"><div style="display:inline-block"></div><div style="display:inline-block"></div><div style="display:inline-block"></div></div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>Moka☆君</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="/Java/SpringBoot/Spring Boot整合Redis" title="Spring Boot整合Redis">/Java/SpringBoot/Spring Boot整合Redis</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><svg class="icon"><use xlink:href="#icon-creative-commons-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-by-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-nc-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-sa-line"></use></svg></a> 许可协议。</li></ul></section></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Security/" rel="prev" title="Spring Boot整合Security"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-left-s-line"></use></svg><span class="post-nav-text">Spring Boot整合Security</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/Java/SpringBoot/Spring%20Boot%E7%AC%94%E8%AE%B0/" rel="next" title="Spring Boot笔记"><span class="post-nav-text">Spring Boot笔记</span><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-right-s-line"></use></svg></a></div></div></div><div class="hty-card" id="comment"><div class="comment-tooltip text-center"><span>要不要和我说些什么？</span><br><a class="hty-button hty-button--raised" id="github-issues" target="_blank" rel="noopener" href="https://github.com/MokaJun/mokajun.github.io/issues?q=is:issue+Spring Boot整合Redis">GitHub Issues</a><a class="hty-button hty-button--raised" id="github-discussions" target="_blank" rel="noopener" href="https://github.com/MokaJun/mokajun.github.io/discussions/new">GitHub Discussions</a></div><div id="waline"></div><script>Yun.utils.getScript("https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js", () => {
+  const walineConfig = {"enable":true,"serverURL":"https://myproject-rho.vercel.app","comment":true,"visitor":true,"el":"#waline","lang":"zh-CN"}
+  walineConfig.path = "/Java/SpringBoot/Spring%20Boot%E6%95%B4%E5%90%88Redis/"
+  new Waline(walineConfig)
+}, window.Waline);</script></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2021 </span><span class="with-love" id="animate"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-cloud-line"></use></svg></span><span class="author"> Moka☆君</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.0</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.6.1</span></div><div class="live_time"><span>本博客已萌萌哒地运行</span><span id="display_live_time"></span><span class="moe-text">(●'◡'●)</span><script>function blog_live_time() {
+  setTimeout(blog_live_time, 1000);
+  const start = new Date('2021-04-12T00:00:00');
+  const now = new Date();
+  const timeDiff = (now.getTime() - start.getTime());
+  const msPerMinute = 60 * 1000;
+  const msPerHour = 60 * msPerMinute;
+  const msPerDay = 24 * msPerHour;
+  const passDay = Math.floor(timeDiff / msPerDay);
+  const passHour = Math.floor((timeDiff % msPerDay) / 60 / 60 / 1000);
+  const passMinute = Math.floor((timeDiff % msPerHour) / 60 / 1000);
+  const passSecond = Math.floor((timeDiff % msPerMinute) / 1000);
+  display_live_time.innerHTML = " " + passDay + " 天 " + passHour + " 小时 " + passMinute + " 分 " + passSecond + " 秒";
+}
+blog_live_time();
+</script></div></footer><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-up-s-line"></use></svg><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round"></circle></svg></a><a class="popup-trigger hty-icon-button icon-search" id="search" href="javascript:;" title="搜索"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-search-line"></use></svg></span></a><script>window.addEventListener("DOMContentLoaded", () => {
+  // Handle and trigger popup window
+  document.querySelector(".popup-trigger").addEventListener("click", () => {
+    document.querySelector(".popup").classList.add("show");
+    setTimeout(() => {
+      document.querySelector(".search-input").focus();
+    }, 100);
+  });
+
+  // Monitor main search box
+  const onPopupClose = () => {
+    document.querySelector(".popup").classList.remove("show");
+  };
+
+  document.querySelector(".popup-btn-close").addEventListener("click", () => {
+    onPopupClose();
+  });
+
+  window.addEventListener("keyup", event => {
+    if (event.key === "Escape") {
+      onPopupClose();
+    }
+  });
+});
+</script><script defer src="https://cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script><script defer src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script><script defer src="/js/search/algolia-search.js"></script><div class="popup search-popup"><div class="search-header"><span class="popup-btn-close close-icon hty-icon-button"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-close-line"></use></svg></span></div><div class="search-input-container"></div><div class="algolia-results"><div id="algolia-stats"></div><div id="algolia-hits"></div><div class="algolia-pagination" id="algolia-pagination"></div></div></div><div class="aplayer no-destroy" id="aplayer" data-id="926815057" data-server="netease" data-type="playlist" data-fixed="true" data-theme="#2980b9" data-loop="all" data-order="list" data-preload="auto" data-volume="0.4" data-mutex data-lrctype="0" data-listmaxheight="340px" data-storagename="metingjs"></div></div></body></html>
