@@ -70,15 +70,15 @@ get key</code></pre>
 port ：设定端口号，默认为6379
 bind ：绑定IP地址
 databases ：数据库数量，默认16
-save &lt;second&gt; &lt;changes&gt; ：指定多少时间、有多少次更新操作，就将数据同步到数据文件
-#redis默认配置有三个条件，满足一个即进行持久化
-save 900 1 #900s有1个更改
-save 300 10 #300s有10个更改
-save 60 10000 #60s有10000更改
+save &lt;second<span class="token punctuation">></span> &lt;changes<span class="token punctuation">></span> ：指定多少时间、有多少次更新操作，就将数据同步到数据文件
+<span class="token comment">#redis默认配置有三个条件，满足一个即进行持久化</span>
+save 900 1 <span class="token comment">#900s有1个更改</span>
+save 300 10 <span class="token comment">#300s有10个更改</span>
+save 60 10000 <span class="token comment">#60s有10000更改</span>
 dbfilename ：指定本地数据库的文件名，默认为dump.rdb
-dir ：指定本地数据库的存放目录，默认为.&#x2F;当前文件夹
+dir ：指定本地数据库的存放目录，默认为./当前文件夹
 requirepass ：设置密码，默认关闭
-redis -cli -h host -p port -a password</code></pre>
+redis <span class="token punctuation">-</span>cli <span class="token punctuation">-</span>h host <span class="token punctuation">-</span>p port <span class="token punctuation">-</span>a password</code></pre>
 
 <h3 id="redis常用命令"><a href="#redis常用命令" class="headerlink" title="redis常用命令"></a>redis常用命令</h3><p>redis五种数据类型：<strong>string、hash、list、set、zset</strong></p>
 <ul>
@@ -267,11 +267,11 @@ redis -cli -h host -p port -a password</code></pre>
 <span class="token punctuation">&#125;</span></code></pre>
 
 <p>4、创建配置⽂件 application.yml</p>
-<pre class="language-yml" data-language="yml"><code class="language-yml">spring:
-	redis:
-		database: 0
-		host: localhost
-		port: 6379</code></pre>
+<pre class="language-yml" data-language="yml"><code class="language-yml"><span class="token key atrule">spring</span><span class="token punctuation">:</span>
+	<span class="token key atrule">redis</span><span class="token punctuation">:</span>
+		<span class="token key atrule">database</span><span class="token punctuation">:</span> <span class="token number">0</span>
+		<span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
+		<span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">6379</span></code></pre>
 
 <p>5、创建启动类</p>
 <pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">com<span class="token punctuation">.</span>southwind</span><span class="token punctuation">;</span>
